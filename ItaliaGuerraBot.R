@@ -8,12 +8,15 @@ library(rgdal)
 
 #------------------ carica dati --------------------------
 
-source("funzioni.R")
+
 
 # Inserire la cartella dove son presenti i dati    <<--
 
 Cartella <- "C:/Users/fabio.lazzarato/Documents/ItaliaGuerraBot/"   # <<--
 setwd(Cartella);         # setta la mia cartella dove ho messo i poligoni
+
+source("funzioni.R")
+
 italia <- readOGR(dsn=path.expand("ProvCM01012019_g"))        # legge i poligoni
 centr <- gCentroid(italia, byid = T, id = italia$SIGLA)       # trova il centroide di ogni poligono
 
@@ -26,7 +29,7 @@ names(tab_centr_input)[4] <- "poss"
 tabella_finale <- data.frame(prov_vincente=character(),numero_turni=integer())
 
 #-------------------inizio delle run -----------------------------
-numero_di_run <- 1000
+numero_di_run <- 10000
 
  for(i in 1: numero_di_run){
   
@@ -89,9 +92,9 @@ numero_di_run <- 1000
   nome_png <- paste("imm-",i,".png")
   
   
-  plot_run(sp                    = italia,
-           df                    = tabella_finale,
-           df_originale          = tab_centr)
+  # plot_run(sp                    = italia,
+  #          df                    = tabella_finale,
+  #          df_originale          = tab_centr)
   
  }
 
