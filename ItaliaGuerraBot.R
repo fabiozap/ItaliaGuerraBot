@@ -10,17 +10,17 @@ library(rgdal)
 
 # Inserire la cartella dove son presenti i dati    <<--
 
-Cartella <- "C:/Users/fabio.lazzarato/Downloads/ItaliaGuerraBot/"   # <<--
-setwd(Cartella)         # setta la mia cartella dove ho messo i poligoni
+Cartella <- "C:/Users/fabio.lazzarato/Documents/ItaliaGuerraBot/"   # <<--
+setwd(Cartella);         # setta la mia cartella dove ho messo i poligoni
 italia <- readOGR(dsn=path.expand("ProvCM01012019_g"))        # legge i poligoni
 centr <- gCentroid(italia, byid = T, id = italia$SIGLA)       # trova il centroide di ogni poligono
 
 #------------------creazione tabella master --------------
-tab_centr_input <- data.frame(coordinates(centr), italia$SIGLA, italia$SIGLA)
+tab_centr_input <- data.frame(coordinates(centr), italia$SIGLA, italia$SIGLA);
 names(tab_centr_input)[3] <- "prov"
 names(tab_centr_input)[4] <- "poss"
 
-#--------------------funzione distanza ------------------------------
+#--------------------funzioni ------------------------------
 distanza <- function(x1,x2,y1,y2){
   d <- sqrt((x2-x1)^2+(y2-y1)^2)
   return(d)
@@ -30,8 +30,9 @@ distanza <- function(x1,x2,y1,y2){
 tabella_finale <- data.frame(prov_vincente=character(),numero_turni=integer())
 
 #-------------------inizio delle run -----------------------------
-numero_di_run <- 100
-for(i in 1: numero_di_run){
+numero_di_run <- 5
+
+ for(i in 1: numero_di_run){
   
   tab_centr<-tab_centr_input
   prov_unic <- 107
@@ -41,42 +42,58 @@ for(i in 1: numero_di_run){
   while(prov_unic != 1) {
     
     
-    prov_att <- sample(tab_centr$poss,1)
+    # prov_att: dall'elenco dei possessori viene estratta la provincia attaccante
+    
+    #prov_att <- sample(tab_centr$poss,1)
+    prov_att <- sample(tab_centr$prov,1)
     x1 <- tab_centr$x[tab_centr$prov==prov_att]
     y1 <- tab_centr$y[tab_centr$prov==prov_att]
     
     x2 <- tab_centr$x
     y2 <- tab_centr$y
     
-    d <- distanza(x1,x2,y1,y2)
+    d <- distanza(x1,x2,y1,y2);
     tab_dist <- data.frame(tab_centr$prov,d,tab_centr$poss)
-    d_min <- min(tab_dist$d[tab_centr$poss != prov_att])
+    d_min <- min(tab_dist$d[tab_centr$poss != tab_centr$poss[tab_centr$prov==prov_att]])
     prov_vic <- tab_dist[tab_dist$d == d_min,"tab_centr.prov"]
-    tab_centr$poss[tab_centr$prov==prov_vic] <- prov_att
+    tab_centr$poss[tab_centr$prov==prov_vic] <- tab_centr$poss[tab_centr$prov==prov_att]
     prov_unic <- length(unique(tab_centr$poss))
     turno <- turno +1
     
     # SCOMMENTA PER VEDERE L'AVANZAMENTO DELLA GUERRA
 
-    # if (turno %% 20 == 0 ){
-    #   plot(italia,col=tab_centr$poss)
-    #   titolo <- paste(prov_att," >> ",prov_vic," turno:",turno," rimanenti:",prov_unic)
-    #   title(titolo)
-    #   Sys.sleep(0.1)
-    # }
+    if (turno %% 20 == 0 ){
+      plot(italia,col=tab_centr$poss)
+      titolo <- paste(tab_centr$poss[tab_centr$prov==prov_att]," >> ",prov_vic," turno:",turno," rimanenti:",prov_unic)
+      title(titolo)
+      Sys.sleep(0.1)
+    }
     
     
     # alla fine resetta per riportare tutto alla situazione iniziale
     if (prov_unic==1){
-      tab_centr <- tab_centr_input
-      turno_finale <- turno
-      turno <- 0
-    }
+      situazione_finale <- tab_centr;
+      tab_centr <- tab_centr_input;
+      turno_finale <- turno;
+      turno <- 0;
+    };
     
 
   }
-  temp <- data.frame(prov_att,turno_finale)
+  to_be_print <- paste("Run: ",i," Vincitore: ",situazione_finale$poss[situazione_finale$prov==prov_att],", # turni: ",turno_finale)
+  print(to_be_print)
+  temp <- data.frame(situazione_finale$poss[situazione_finale$prov==prov_att],turno_finale)
   names(temp) <- c("prov_vincente","numero_turni")
   tabella_finale <- rbind(tabella_finale,temp)
-}
+  numero_vittorie <- table(unlist(tabella_finale$prov_vincente))
+  max_numero_vittorie <- max(numero_vittorie)
+  df_finale <- data.frame(numero_vittorie)
+  names(df_finale) <- c("prov","freq")
+  merge <- merge(tab_centr,df_finale,by="prov", sort=F)
+  rbPal <- colorRampPalette(c('blue','red'))
+  colori <- rbPal(max_numero_vittorie)[as.numeric(cut(merge$freq,seq(0,max_numero_vittorie,by=1)))]
+  plot(italia, col=colori)
+  Sys.sleep(2)
+  
+ }
 
