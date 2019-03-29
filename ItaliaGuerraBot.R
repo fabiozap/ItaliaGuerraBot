@@ -8,6 +8,8 @@ library(rgdal)
 
 #------------------ carica dati --------------------------
 
+source("funzioni.R")
+
 # Inserire la cartella dove son presenti i dati    <<--
 
 Cartella <- "C:/Users/fabio.lazzarato/Documents/ItaliaGuerraBot/"   # <<--
@@ -20,17 +22,11 @@ tab_centr_input <- data.frame(coordinates(centr), italia$SIGLA, italia$SIGLA);
 names(tab_centr_input)[3] <- "prov"
 names(tab_centr_input)[4] <- "poss"
 
-#--------------------funzioni ------------------------------
-distanza <- function(x1,x2,y1,y2){
-  d <- sqrt((x2-x1)^2+(y2-y1)^2)
-  return(d)
-}
-
 #-------------------tabella finale-----------------------
 tabella_finale <- data.frame(prov_vincente=character(),numero_turni=integer())
 
 #-------------------inizio delle run -----------------------------
-numero_di_run <- 5
+numero_di_run <- 1000
 
  for(i in 1: numero_di_run){
   
@@ -60,14 +56,19 @@ numero_di_run <- 5
     prov_unic <- length(unique(tab_centr$poss))
     turno <- turno +1
     
-    # SCOMMENTA PER VEDERE L'AVANZAMENTO DELLA GUERRA
+    
 
-    if (turno %% 20 == 0 ){
-      plot(italia,col=tab_centr$poss)
-      titolo <- paste(tab_centr$poss[tab_centr$prov==prov_att]," >> ",prov_vic," turno:",turno," rimanenti:",prov_unic)
-      title(titolo)
-      Sys.sleep(0.1)
-    }
+    
+    # if (turno %% 20 == 0 ){
+    #   plot_temp(sp                     = italia,
+    #             df                     = tab_centr,
+    #             poss                   = poss,
+    #             prov                   = prov,
+    #             provincia_estratta     = prov_att,
+    #             provincia_sconfitta    = prov_vic,
+    #             province_rimanenti     = prov_unic,
+    #             turno                  = turno)
+    # }
     
     
     # alla fine resetta per riportare tutto alla situazione iniziale
