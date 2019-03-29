@@ -79,22 +79,19 @@ numero_di_run <- 1000
       turno <- 0;
     };
     
-
   }
   to_be_print <- paste("Run: ",i," Vincitore: ",situazione_finale$poss[situazione_finale$prov==prov_att],", # turni: ",turno_finale)
   print(to_be_print)
   temp <- data.frame(situazione_finale$poss[situazione_finale$prov==prov_att],turno_finale)
   names(temp) <- c("prov_vincente","numero_turni")
   tabella_finale <- rbind(tabella_finale,temp)
-  numero_vittorie <- table(unlist(tabella_finale$prov_vincente))
-  max_numero_vittorie <- max(numero_vittorie)
-  df_finale <- data.frame(numero_vittorie)
-  names(df_finale) <- c("prov","freq")
-  merge <- merge(tab_centr,df_finale,by="prov", sort=F)
-  rbPal <- colorRampPalette(c('blue','red'))
-  colori <- rbPal(max_numero_vittorie)[as.numeric(cut(merge$freq,seq(0,max_numero_vittorie,by=1)))]
-  plot(italia, col=colori)
-  Sys.sleep(2)
+  
+  nome_png <- paste("imm-",i,".png")
+  
+  
+  plot_run(sp                    = italia,
+           df                    = tabella_finale,
+           df_originale          = tab_centr)
   
  }
 
